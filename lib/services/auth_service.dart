@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
+import '../models/userProfile.dart';
 
 class AuthService {
   Future<User> login(String username, String password) async {
@@ -19,14 +20,14 @@ class AuthService {
   }
 
 
-    Future<User> getCurrentUser(String accessToken) async {
+    Future<UserProfile> getCurrentUser(String accessToken) async {
     final response = await http.get(
       Uri.parse('https://dummyjson.com/auth/me'),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
      if (response.statusCode == 200) {
-      final user = User.fromJson(jsonDecode(response.body));
-      return user;
+      final userProfile = UserProfile.fromJson(jsonDecode(response.body));
+      return userProfile;
     } else {
       throw Exception(jsonDecode(response.body)['message']);
     }
