@@ -13,12 +13,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _start();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
   }
 
   Future <void> _start() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.tryAutoLogin();
+    await authProvider.tryAutoLogin();  
     if(!mounted) return;
     if (authProvider.isLoggedIn) {
       Navigator.pushReplacementNamed(context, '/home');

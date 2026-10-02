@@ -47,23 +47,25 @@ class AuthProvider extends ChangeNotifier {
     await _tokenStorage.deleteToken();
     notifyListeners();
   }
+  
   Future<void> tryAutoLogin() async {
     _isLoading = true;
     notifyListeners();
 
-    final token = await _tokenStorage.readToken();
-    if (token != null) {
-      try {
-        final profile = await _authService.getCurrentUser(token);
-        _accessToken = token;
-        _profile = profile;
-      } catch (e) {
-        await _tokenStorage.deleteToken();
+    try {
+      final token = await _tokenStorage.readToken();
+      if (token != null) {
+        try {
+          final profile = await _authService.getCurrentUser(token);
+          _accessToken = token;
+          _profile = profile;
+        } catch (e) {
+          await _tokenStorage.deleteToken();
+        }
       }
-      finally {
-        _isLoading = false;
-        notifyListeners();
-      }
-    } 
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

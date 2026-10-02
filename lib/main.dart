@@ -17,8 +17,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
+      
       create: (_) => AuthProvider(AuthService(), TokenStorage()),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'DummyJSON Shop',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

@@ -9,7 +9,7 @@ class AuthService {
       Uri.parse('https://dummyjson.com/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
-    );
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final user = User.fromJson(jsonDecode(response.body));
@@ -24,7 +24,7 @@ class AuthService {
     final response = await http.get(
       Uri.parse('https://dummyjson.com/auth/me'),
       headers: {'Authorization': 'Bearer $accessToken'},
-    );
+    ).timeout(const Duration(seconds: 10));
      if (response.statusCode == 200) {
       final userProfile = UserProfile.fromJson(jsonDecode(response.body));
       return userProfile;
