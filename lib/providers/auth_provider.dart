@@ -20,6 +20,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading; 
   String? get errorMessage => _errorMessage;
   UserProfile? get profile => _profile;
+  String? get accessToken => _accessToken;
 
 
   // 4. method signatures for login, logout, tryAutoLogin (empty bodies for now)
