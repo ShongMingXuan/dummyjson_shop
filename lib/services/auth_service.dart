@@ -19,7 +19,7 @@ class AuthService {
     }
   }
 
-
+    
     Future<UserProfile> getCurrentUser(String accessToken) async {
     final response = await http.get(
       Uri.parse('https://dummyjson.com/auth/me'),
