@@ -1,30 +1,31 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dummyjson_shop/utils/jwt_utils.dart';
 
-import 'package:dummyjson_shop/main.dart';
 
-void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+void main()
+{
+  test('JWT Decoding Test', () {
+    // Example JWT token (replace with a valid token for real testing)
+    const jwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJlbWlseXMiLCJlbWFpbCI6ImVtaWx5LmpvaG5zb25AeC5kdW1teWpzb24uY29tIiwiZmlyc3ROYW1lIjoiRW1pbHkiLCJsYXN0TmFtZSI6IkpvaG5zb24iLCJnZW5kZXIiOiJmZW1hbGUiLCJpbWFnZSI6Imh0dHBzOi8vZHVtbXlqc29uLmNvbS9pY29uL2VtaWx5cy8xMjgiLCJpYXQiOjE3OTExNjQ2NDgsImV4cCI6MTc5MTE2ODI0OH0.oDd214q32FxNT_w6ZUH12G0DRzJVcusoAv00P3E4s78';
+    final decodedPayload = decodePayload(jwtToken);
+    // Add assertions to verify the decoded payload
+    expect(decodedPayload['id'], equals(1));
+    expect(decodedPayload['username'], equals('emilys'));
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  test('Token Expiration Test', () {
+    // Example expired JWT token (replace with an actual expired token for real testing)
+    const expiredJwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJlbWlseXMiLCJlbWFpbCI6ImVtaWx5LmpvaG5zb25AeC5kdW1teWpzb24uY29tIiwiZmlyc3ROYW1lIjoiRW1pbHkiLCJsYXN0TmFtZSI6IkpvaG5zb24iLCJnZW5kZXIiOiJmZW1hbGUiLCJpbWFnZSI6Imh0dHBzOi8vZHVtbXlqc29uLmNvbS9pY29uL2VtaWx5cy8xMjgiLCJpYXQiOjE3OTExNjQ2NDgsImV4cCI6MTc5MTE2ODI0OH0.oDd214q32FxNT_w6ZUH12G0DRzJVcusoAv00P3E4s78';
+    final isExpired = isTokenExpired(expiredJwtToken);
+    expect(isExpired, equals(true));
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('token from the past is expired', () {
+    expect(isTokenExpired(fakeToken(nowSeconds() - 60)), true);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('token one hour in the future is not expired', () {
+    expect(isTokenExpired(fakeToken(nowSeconds() + 3600)), false);
   });
 }

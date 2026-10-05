@@ -1,6 +1,7 @@
 import 'package:dummyjson_shop/models/userProfile.dart';
 import 'package:dummyjson_shop/services/auth_service.dart';
 import 'package:dummyjson_shop/services/token_storage.dart';
+import 'package:dummyjson_shop/utils/jwt_utils.dart';
 import 'package:flutter/material.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -56,9 +57,13 @@ class AuthProvider extends ChangeNotifier {
       final token = await _tokenStorage.readToken();
       if (token != null) {
         try {
-          final profile = await _authService.getCurrentUser(token);
-          _accessToken = token;
-          _profile = profile;
+          if (isTokenExpired(token)) {
+            await _tokenStorage.deleteToken();
+          } else {
+            final profile = await _authService.getCurrentUser(token);
+            _accessToken = token;
+            _profile = profile;
+          }
         } catch (e) {
           await _tokenStorage.deleteToken();
         }
