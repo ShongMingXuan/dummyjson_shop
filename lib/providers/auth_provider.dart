@@ -25,6 +25,7 @@ class AuthProvider extends ChangeNotifier {
 
   // 4. method signatures for login, logout, tryAutoLogin (empty bodies for now)
   AuthProvider(this._authService, this._tokenStorage);
+  
   Future<void> login(String username, String password) async {
     _isLoading = true;
     _errorMessage = null;

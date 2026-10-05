@@ -33,13 +33,13 @@
       try {
         final fetchedProducts = await _productService.fetchProducts(
           accessToken: accessToken,
-          limit: 10,
+          limit: _pageSize,
           skip: 0,
         );
 
         _products = fetchedProducts;
         _skip = fetchedProducts.length;
-        _hasMore = fetchedProducts.length == 10;
+        _hasMore = fetchedProducts.length == _pageSize;
 
         if (_products.isEmpty) {
           _status = ProductListStatus.empty;
@@ -55,6 +55,27 @@
     }
 
 
-    Future<void> loadMore(String accessToken) async {}
+    Future<void> loadMore(String accessToken) async {
+      if (_isLoadingMore || !_hasMore) return;
+      _isLoadingMore = true;
+      notifyListeners();
+
+      try {
+        final fetchedProducts = await _productService.fetchProducts(
+          accessToken: accessToken,
+          limit: _pageSize,
+          skip: _skip,
+        );
+
+        _products.addAll(fetchedProducts);
+        _skip += fetchedProducts.length;
+        _hasMore = fetchedProducts.length == _pageSize;
+      } catch (e) {
+        _errorMessage = e.toString();
+      } finally {
+        _isLoadingMore = false;
+        notifyListeners();
+      }
+    }
     
   }
