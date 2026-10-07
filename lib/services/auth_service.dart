@@ -32,4 +32,23 @@ class AuthService {
       throw Exception(jsonDecode(response.body)['message']);
     }
   }
-}
+
+  Future<({String accessToken, String refreshToken})> refreshToken(String refreshToken) async {
+    final response = await http.post(
+      Uri.parse('https://dummyjson.com/auth/refresh'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'refreshToken': refreshToken}),
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return (
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String,
+      );
+    } else {
+      final body = jsonDecode(response.body);
+      throw Exception(body['message'] ?? 'Failed to refresh token');
+    }
+  }
+}  

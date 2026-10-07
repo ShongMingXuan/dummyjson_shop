@@ -13,6 +13,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String? _accessToken;
+  String? _refreshToken;
   UserProfile? _profile;
 
   // 3. getter for the state
@@ -21,7 +22,7 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   UserProfile? get profile => _profile;
   String? get accessToken => _accessToken;
-
+  String? get refreshToken => _refreshToken;
 
   // 4. method signatures for login, logout, tryAutoLogin (empty bodies for now)
   AuthProvider(this._authService, this._tokenStorage);
@@ -34,8 +35,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       final user = await _authService.login(username, password);
       final profile = await _authService.getCurrentUser(user.accessToken);
-      await _tokenStorage.saveToken(user.accessToken);
+      await _tokenStorage.saveTokens(user.accessToken, user.refreshToken);
       _accessToken = user.accessToken;
+      _refreshToken = user.refreshToken;
       _profile = profile;
     } catch (e) {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -46,8 +48,9 @@ class AuthProvider extends ChangeNotifier {
   }
   Future<void> logout() async {
     _accessToken = null;
+    _refreshToken = null;
     _profile = null;
-    await _tokenStorage.deleteToken();
+    await _tokenStorage.deleteTokens();
     notifyListeners();
   }
   
@@ -56,18 +59,29 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await _tokenStorage.readToken();
-      if (token != null) {
+      final accesstoken = await _tokenStorage.readAccessToken();
+      final savedRefresh = await _tokenStorage.readRefreshToken();
+      if (accesstoken != null) {
         try {
-          if (isTokenExpired(token)) {
-            await _tokenStorage.deleteToken();
+          if (isTokenExpired(accesstoken)) {
+            if (savedRefresh != null && !isTokenExpired(savedRefresh)) {
+              final user = await _authService.refreshToken(savedRefresh);
+              await _tokenStorage.saveTokens(user.accessToken, user.refreshToken);
+              final profile = await _authService.getCurrentUser(user.accessToken);
+              _accessToken = user.accessToken;
+              _refreshToken = user.refreshToken;
+              _profile = profile;
+            } else {
+                await _tokenStorage.deleteTokens();
+              }
           } else {
-            final profile = await _authService.getCurrentUser(token);
-            _accessToken = token;
+            final profile = await _authService.getCurrentUser(accesstoken);
+            _accessToken = accesstoken;
+            _refreshToken = savedRefresh;
             _profile = profile;
           }
         } catch (e) {
-          await _tokenStorage.deleteToken();
+          await _tokenStorage.deleteTokens();
         }
       }
     } finally {
