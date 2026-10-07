@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 product.thumbnailUrl,
                 width: 56,
                 height: 56,
-                errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+                errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
               ),
               title: Text(product.title),
               subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
