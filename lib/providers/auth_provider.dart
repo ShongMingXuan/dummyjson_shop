@@ -1,4 +1,5 @@
 import 'package:dummyjson_shop/models/userProfile.dart';
+import 'package:dummyjson_shop/services/api_exception.dart';
 import 'package:dummyjson_shop/services/auth_service.dart';
 import 'package:dummyjson_shop/services/token_storage.dart';
 import 'package:dummyjson_shop/utils/jwt_utils.dart';
@@ -89,4 +90,23 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+    Future<String?> refreshSession() async {
+      if (_refreshToken == null) return null;
+
+      try {
+        final tokens = await _authService.refreshToken(_refreshToken!);
+        await _tokenStorage.saveTokens(tokens.accessToken, tokens.refreshToken);
+        _accessToken = tokens.accessToken;
+        _refreshToken = tokens.refreshToken;
+        return _accessToken;
+      } on ApiException catch (e) {
+        if (e.statusCode == 401) {
+          await logout();
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
 }

@@ -24,8 +24,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(AuthService(), TokenStorage()),
         ),
-        ChangeNotifierProvider(
-          create: (_) => ProductProvider(ProductService()),
+       ChangeNotifierProxyProvider<AuthProvider, ProductProvider>(
+        create: (context) => ProductProvider(
+          ProductService(),
+          () => context.read<AuthProvider>().refreshSession(),
+        ),
+        update: (context, auth, previous) => previous!,
         ), 
       ],
       child: MaterialApp(

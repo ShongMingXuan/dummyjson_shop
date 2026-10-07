@@ -1,4 +1,5 @@
-  import 'package:flutter/material.dart';
+  import 'package:dummyjson_shop/services/api_exception.dart';
+import 'package:flutter/material.dart';
   import 'package:dummyjson_shop/services/product_service.dart';
   import 'package:dummyjson_shop/models/product.dart';
 
@@ -8,6 +9,7 @@
     static const _pageSize = 10;
     
     final ProductService _productService;
+    final Future<String?> Function() _refreshSession;
     
     ProductListStatus _status = ProductListStatus.loading;
     List<Product> _products = <Product>[]; 
@@ -23,7 +25,7 @@
     bool get isLoadingMore => _isLoadingMore;
     bool get hasMore => _hasMore;
 
-    ProductProvider(this._productService);
+    ProductProvider(this._productService, this._refreshSession);
 
     Future<void> loadFirstPage(String accessToken) async {
       _status = ProductListStatus.loading;
@@ -31,16 +33,11 @@
       notifyListeners();
 
       try {
-        final fetchedProducts = await _productService.fetchProducts(
-          accessToken: accessToken,
-          limit: _pageSize,
-          skip: 0,
-        );
-
+        final fetchedProducts = await _fetchWithRetry(accessToken, 0);
         _products = fetchedProducts;
         _skip = fetchedProducts.length;
         _hasMore = fetchedProducts.length == _pageSize;
-
+    
         if (_products.isEmpty) {
           _status = ProductListStatus.empty;
         } else {
@@ -61,12 +58,7 @@
       notifyListeners();
 
       try {
-        final fetchedProducts = await _productService.fetchProducts(
-          accessToken: accessToken,
-          limit: _pageSize,
-          skip: _skip,
-        );
-
+        final fetchedProducts = await _fetchWithRetry(accessToken, _skip);
         _products.addAll(fetchedProducts);
         _skip += fetchedProducts.length;
         _hasMore = fetchedProducts.length == _pageSize;
@@ -78,4 +70,27 @@
       }
     }
     
+
+    Future<List<Product>> _fetchWithRetry(String accessToken, int skip) async {
+      try {
+        return await _productService.fetchProducts(
+          accessToken: accessToken,
+          limit: _pageSize,
+          skip: skip,
+        );
+      } on ApiException catch (e) {
+        if (e.statusCode != 401) rethrow;
+        final newToken = await _refreshSession();
+        if (newToken == null) {
+          throw ApiException('Session expired. Please log in again.', 401);
+        }
+        else {
+          return await _productService.fetchProducts(
+            accessToken: newToken,
+            limit: _pageSize,
+            skip: skip,
+          );
+        }
+      }
+    }
   }

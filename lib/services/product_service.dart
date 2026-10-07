@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dummyjson_shop/services/api_exception.dart';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
 
@@ -17,9 +18,12 @@ class ProductService {
       final productsJson = data['products'] as List<dynamic>;
       final products = productsJson.map((items) => Product.fromJson(items)).toList();
       return products;
-    }
+    } 
     else {
-      throw Exception(jsonDecode(response.body)['message']);
+      final body = jsonDecode(response.body);
+      throw ApiException(body['message'] ?? 'Failed to fetch products', response.statusCode);
     }
   }
+
+  
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dummyjson_shop/services/api_exception.dart';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import '../models/userProfile.dart';
@@ -8,14 +9,15 @@ class AuthService {
     final response = await http.post(
       Uri.parse('https://dummyjson.com/auth/login'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password}),
+      body: jsonEncode({'username': username, 'password': password,'expiresInMins': 1,}), // expiresIn is in seconds
     ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final user = User.fromJson(jsonDecode(response.body));
       return user;
     } else {
-      throw Exception(jsonDecode(response.body)['message']);
+      final body = jsonDecode(response.body);
+      throw ApiException(body['message'] ?? 'Failed to login', response.statusCode);
     }
   }
 
@@ -29,7 +31,7 @@ class AuthService {
       final userProfile = UserProfile.fromJson(jsonDecode(response.body));
       return userProfile;
     } else {
-      throw Exception(jsonDecode(response.body)['message']);
+      throw ApiException('Failed to get user profile: ${response.statusCode}', response.statusCode);
     }
   }
 
@@ -48,7 +50,8 @@ class AuthService {
       );
     } else {
       final body = jsonDecode(response.body);
-      throw Exception(body['message'] ?? 'Failed to refresh token');
+      throw ApiException(body['message'] ?? 'Failed to refresh token', response.statusCode);
     }
-  }
+  } 
+
 }  
