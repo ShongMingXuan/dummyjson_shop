@@ -1,3 +1,5 @@
+import 'package:dummyjson_shop/providers/cart_provider.dart';
+import 'package:dummyjson_shop/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
@@ -31,6 +33,7 @@ class MyApp extends StatelessWidget {
         ),
         update: (context, auth, previous) => previous!,
         ), 
+        ChangeNotifierProvider(create:(_) => CartProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -43,6 +46,7 @@ class MyApp extends StatelessWidget {
           '/': (context) => const SplashScreen(),
           '/login': (context) => const LoginScreen(),
           '/home': (context) => const HomeScreen(),
+          '/cart': (context) => const CartScreen(),
         },
       ),
     );

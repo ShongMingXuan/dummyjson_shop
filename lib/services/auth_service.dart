@@ -9,7 +9,7 @@ class AuthService {
     final response = await http.post(
       Uri.parse('https://dummyjson.com/auth/login'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password,'expiresInMins': 1,}), // expiresIn is in seconds
+      body: jsonEncode({'username': username, 'password': password,}),
     ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {

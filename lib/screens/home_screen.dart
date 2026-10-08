@@ -1,3 +1,4 @@
+import 'package:dummyjson_shop/providers/cart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -92,6 +93,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: Text(product.title),
               subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
+              trailing: IconButton(
+                icon: const Icon(Icons.add_shopping_cart),
+                onPressed: () {
+                  context.read<CartProvider>().addItem(product);
+                },
+              ),
             );
           },
         );
@@ -101,11 +108,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProductProvider>();
+    final cartCount = context.select<CartProvider, int>((cart) => cart.itemCount);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
         actions: [
           IconButton(
+            icon: Badge(
+              isLabelVisible: cartCount > 0,
+              label: Text('$cartCount'),
+              child: const Icon(Icons.shopping_cart),
+            ),
+            tooltip: 'Cart',
+            onPressed: () {
+              Navigator.pushNamed(context, '/cart');
+            },
+          ),
+          IconButton( 
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: _logout,
