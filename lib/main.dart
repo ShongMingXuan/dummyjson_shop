@@ -1,5 +1,7 @@
 import 'package:dummyjson_shop/providers/cart_provider.dart';
 import 'package:dummyjson_shop/screens/cart_screen.dart';
+import 'package:dummyjson_shop/screens/main_shell.dart';
+import 'package:dummyjson_shop/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
@@ -38,14 +40,12 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'DummyJSON Shop',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
+        theme: AppTheme.light,
         initialRoute: '/',
         routes: {
           '/': (context) => const SplashScreen(),
           '/login': (context) => const LoginScreen(),
-          '/home': (context) => const HomeScreen(),
+          '/home': (context) => const MainShell(),
           '/cart': (context) => const CartScreen(),
         },
       ),

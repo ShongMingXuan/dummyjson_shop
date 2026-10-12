@@ -1,3 +1,4 @@
+import 'package:dummyjson_shop/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
@@ -19,37 +20,36 @@ class CartScreen extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
-                return ListTile(
-                  leading: Image.network(
-                    item.product.thumbnailUrl,
-                    width: 56,
-                    height: 56,
-                    errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
-                  ),
-                  title: Text(item.product.title),
-                  subtitle: Text('\$${item.totalPrice.toStringAsFixed(2)}'),
-                  // your job: trailing with - , quantity, + buttons
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        onPressed: () {
-                          cart.decreaseItem(item.product);
-                        },
-                      ),
-                      Text('${item.quantity}'),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          cart.addItem(item.product);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete), 
-                        onPressed: () => cart.removeItem(item.product),
-                      ),
-                    ],
+                return Card(
+                  color: AppTheme.bandColors[index ~/ 10 % AppTheme.bandColors.length],
+                  child: ListTile(
+                    leading: Image.network(
+                      item.product.thumbnailUrl,
+                      width: 56,
+                      height: 56,
+                      errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
+                    ),
+                    title: Text(item.product.title),
+                    subtitle: Text('\$${item.totalPrice.toStringAsFixed(2)}'),
+                    // your job: trailing with - , quantity, + buttons
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          onPressed: () {
+                            cart.decreaseItem(item.product);
+                          },
+                        ),
+                        Text('${item.quantity}'),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            cart.addItem(item.product);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

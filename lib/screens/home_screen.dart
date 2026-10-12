@@ -1,4 +1,5 @@
 import 'package:dummyjson_shop/providers/cart_provider.dart';
+import 'package:dummyjson_shop/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -84,22 +85,30 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             }
             final product = provider.products[index];
-            return ListTile(
-              leading: Image.network(
-                product.thumbnailUrl,
-                width: 56,
-                height: 56,
-                errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
-              ),
-              title: Text(product.title),
-              subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-              trailing: IconButton(
-                icon: const Icon(Icons.add_shopping_cart),
-                onPressed: () {
-                  context.read<CartProvider>().addItem(product);
-                },
-              ),
+            final bandColor = AppTheme.bandColors[(index ~/ 10) % AppTheme.bandColors.length];
+            return Card(
+              color : bandColor,
+              child :ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(product.thumbnailUrl, width: 56, height: 56, fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported)),
+                ),
+                title: Text(product.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.add_shopping_cart),
+                  onPressed: () {
+                    context.read<CartProvider>().addItem(product);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${product.title} added to cart')),
+                    );
+                  },
+                ),
+              )
+            
             );
+            
           },
         );
     }

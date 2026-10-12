@@ -11,7 +11,7 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password,}),
     ).timeout(const Duration(seconds: 10));
-
+  
     if (response.statusCode == 200) {
       final user = User.fromJson(jsonDecode(response.body));
       return user;

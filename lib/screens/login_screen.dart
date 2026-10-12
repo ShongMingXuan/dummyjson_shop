@@ -39,9 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // watch is allowed here, because we are inside build()
-    final isLoading = context.select<AuthProvider, bool>((auth) => auth.isLoading);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Login Page')),
       body: Center(
@@ -68,12 +65,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
               ),
               const SizedBox(height: 24),
-              isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _submit,
-                      child: const Text('Login'),
-                    ),
+              Selector<AuthProvider, bool>(
+                selector: (_,auth) => auth.isLoading,
+                builder: (context, isLoading, child) {
+                  return isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _submit,
+                          child: const Text('Login'),
+                        );
+                }
+              ),
             ],
           ),
         ),
