@@ -17,6 +17,7 @@
     bool _isLoadingMore = false;
     bool _hasMore = true;
     int _skip = 0;
+    bool _loadMoreFailed = false;
 
 
     ProductListStatus get status => _status;
@@ -24,12 +25,14 @@
     String? get errorMessage => _errorMessage;
     bool get isLoadingMore => _isLoadingMore;
     bool get hasMore => _hasMore;
+    bool get loadMoreFailed => _loadMoreFailed;
 
     ProductProvider(this._productService, this._refreshSession);
 
     Future<void> loadFirstPage(String accessToken) async {
       _status = ProductListStatus.loading;
       _errorMessage = null;
+      _loadMoreFailed = false;
       notifyListeners();
 
       try {
@@ -55,6 +58,7 @@
     Future<void> loadMore(String accessToken) async {
       if (_isLoadingMore || !_hasMore) return;
       _isLoadingMore = true;
+      _loadMoreFailed = false;
       notifyListeners();
 
       try {
@@ -63,6 +67,7 @@
         _skip += fetchedProducts.length;
         _hasMore = fetchedProducts.length == _pageSize;
       } catch (e) {
+        _loadMoreFailed = true;
         _errorMessage = e.toString();
       } finally {
         _isLoadingMore = false;
@@ -92,5 +97,15 @@
           );
         }
       }
+    }
+
+    void clear() {
+      _products = [];
+      _skip = 0;
+      _hasMore = true;
+      _loadMoreFailed = false;
+      _errorMessage = null;
+      _status = ProductListStatus.loading;
+      notifyListeners();
     }
   }

@@ -1,6 +1,7 @@
 import 'package:dummyjson_shop/providers/cart_provider.dart';
 import 'package:dummyjson_shop/screens/cart_screen.dart';
 import 'package:dummyjson_shop/screens/main_shell.dart';
+import 'package:dummyjson_shop/screens/profile_screen.dart';
 import 'package:dummyjson_shop/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginScreen(),
           '/home': (context) => const MainShell(),
           '/cart': (context) => const CartScreen(),
+          '/profile': (context) => const ProfileScreen(),
         },
       ),
     );

@@ -24,8 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onScroll() {
     final provider = context.read<ProductProvider>();
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      if (!provider.isLoadingMore && provider.hasMore) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (provider.hasMore &&
+          !provider.isLoadingMore &&
+          !provider.loadMoreFailed) {
         final token = context.read<AuthProvider>().accessToken;
         if (token != null) {
           provider.loadMore(token);
@@ -46,8 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _logout() async {
     await context.read<AuthProvider>().logout();
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 
   Widget _buildBody(ProductProvider provider) {
@@ -76,39 +77,72 @@ class _HomeScreenState extends State<HomeScreen> {
       case ProductListStatus.loaded:
         return ListView.builder(
           controller: _scrollController,
-          itemCount: provider.products.length + (provider.isLoadingMore ? 1 : 0),
+          itemCount: provider.products.length +
+              ((provider.isLoadingMore || provider.loadMoreFailed) ? 1 : 0),
           itemBuilder: (context, index) {
             if (index >= provider.products.length) {
+              if (provider.loadMoreFailed) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      const Text("Couldn't load more products"),
+                      TextButton(
+                        onPressed: () {
+                          final token =
+                              context.read<AuthProvider>().accessToken;
+                          if (token != null) {
+                            context.read<ProductProvider>().loadMore(token);
+                          }
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              }
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(child: CircularProgressIndicator()),
               );
             }
+
             final product = provider.products[index];
-            final bandColor = AppTheme.bandColors[(index ~/ 10) % AppTheme.bandColors.length];
+            final bandColor = AppTheme
+                .bandColors[(index ~/ 10) % AppTheme.bandColors.length];
             return Card(
-              color : bandColor,
-              child :ListTile(
+              color: bandColor,
+              child: ListTile(
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(product.thumbnailUrl, width: 56, height: 56, fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported)),
+                  child: Image.network(
+                    product.thumbnailUrl,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) =>
+                        const Icon(Icons.image_not_supported),
+                  ),
                 ),
-                title: Text(product.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                title: Text(
+                  product.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
                 trailing: IconButton(
                   icon: const Icon(Icons.add_shopping_cart),
                   onPressed: () {
                     context.read<CartProvider>().addItem(product);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${product.title} added to cart')),
+                      SnackBar(
+                        content: Text('${product.title} added to cart'),
+                      ),
                     );
                   },
                 ),
-              )
-            
+              ),
             );
-            
           },
         );
     }
@@ -117,7 +151,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProductProvider>();
-    final cartCount = context.select<CartProvider, int>((cart) => cart.itemCount);
+    final cartCount =
+        context.select<CartProvider, int>((cart) => cart.itemCount);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
@@ -133,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pushNamed(context, '/cart');
             },
           ),
-          IconButton( 
+          IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: _logout,
@@ -146,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _scrollController.dispose();   
+    _scrollController.dispose();
     super.dispose();
   }
 }
