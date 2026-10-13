@@ -1,4 +1,3 @@
-import 'package:dummyjson_shop/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product.dart';
@@ -14,7 +13,7 @@ class ProductDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Details')),
+      appBar: AppBar(title: const Text('Details')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -40,7 +39,7 @@ class ProductDetailScreen extends StatelessWidget {
               product.title,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-
+            const SizedBox(height: 4),
             Text(
               '\$${product.price.toStringAsFixed(2)}',
               style: Theme.of(context).textTheme.headlineSmall,
@@ -50,18 +49,46 @@ class ProductDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          onPressed: () {
-            context.read<CartProvider>().addItem(product);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${product.title} added to cart'),
-                ),
-              ); 
-          },
-          child: const Text('Add to cart'),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Selector<CartProvider, int>(
+            selector: (_, cart) => cart.quantityOf(product),
+            builder: (context, quantity, _) {
+              if (quantity == 0) {
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.read<CartProvider>().addItem(product);
+                    },
+                    child: const Text('Add to cart'),
+                  ),
+                );
+              }
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove),
+                    onPressed: () {
+                      context.read<CartProvider>().decreaseItem(product);
+                    },
+                  ),
+                  Text( 
+                    '$quantity',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      context.read<CartProvider>().addItem(product);
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

@@ -12,6 +12,11 @@ class CartProvider extends ChangeNotifier {
 
   int get itemCount =>
       _items.fold(0, (sum, item) => sum + item.quantity);
+      
+  int quantityOf(Product product) {
+    final index = _items.indexWhere((item) => item.product.id == product.id);
+    return index < 0 ? 0 : _items[index].quantity;
+  }
 
   void addItem(Product product) {
     final index = _items.indexWhere((item) => item.product.id == product.id);
