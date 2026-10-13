@@ -3,12 +3,14 @@ class Product {
   final String title;
   final double price;
   final String thumbnailUrl;
+  final String description;
 
   const Product({
     required this.id,
     required this.title,
     required this.price,
     required this.thumbnailUrl,
+    required this.description,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class Product {
       title: json['title'] as String,
       price: (json['price'] as num).toDouble(),
       thumbnailUrl: json['thumbnail'] as String,
+      description: (json['description'] as String?)??'',
     );
   }
 
@@ -26,6 +29,7 @@ class Product {
       'title': title,
       'price': price,
       'thumbnail': thumbnailUrl,
+      'description': description,
     };
   }
 }

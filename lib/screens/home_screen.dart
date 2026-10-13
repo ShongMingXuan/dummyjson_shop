@@ -1,4 +1,5 @@
 import 'package:dummyjson_shop/providers/cart_provider.dart';
+import 'package:dummyjson_shop/screens/product_detail_screen.dart';
 import 'package:dummyjson_shop/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -150,6 +151,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProductDetailScreen(product: product,color: bandColor),
+                    ),
+                  );
+                },
               ),
             );
           },
