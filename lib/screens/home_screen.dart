@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -193,7 +195,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 prefixIcon: Icon(Icons.search),
               ),
               textInputAction: TextInputAction.search,
-              onSubmitted: _onSearch,
+              onSubmitted:(text){
+                _debounce?.cancel();
+                _onSearch(text) ;
+              } ,
+              onChanged: (text) {
+                _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 800),
+                (){ 
+                    if(!mounted) return;
+                    _onSearch(text);
+                  }
+                );
+              },
             ),
           ),
           Expanded(child: _buildBody(provider)),
@@ -206,6 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 }
