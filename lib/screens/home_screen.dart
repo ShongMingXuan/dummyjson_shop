@@ -26,6 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadProducts());
   }
 
+  Future<void> _onRefresh() async {
+    final token = context.read<AuthProvider>().accessToken;
+    if (token == null) return;
+    await context.read<ProductProvider>().loadFirstPage(token);
+  }
+
   void _onSearch(String text) {
     final token = context.read<AuthProvider>().accessToken;
     if (token == null) return;
@@ -85,83 +91,87 @@ class _HomeScreenState extends State<HomeScreen> {
         );
 
       case ProductListStatus.loaded:
-        return ListView.builder(
-          controller: _scrollController,
-          itemCount: provider.products.length +
-              ((provider.isLoadingMore || provider.loadMoreFailed) ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index >= provider.products.length) {
-              if (provider.loadMoreFailed) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Column(
-                    children: [
-                      const Text("Couldn't load more products"),
-                      TextButton(
-                        onPressed: () {
-                          final token =
-                              context.read<AuthProvider>().accessToken;
-                          if (token != null) {
-                            context.read<ProductProvider>().loadMore(token);
-                          }
-                        },
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: provider.products.length +
+                ((provider.isLoadingMore || provider.loadMoreFailed) ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= provider.products.length) {
+                if (provider.loadMoreFailed) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      children: [
+                        const Text("Couldn't load more products"),
+                        TextButton(
+                          onPressed: () {
+                            final token =
+                                context.read<AuthProvider>().accessToken;
+                            if (token != null) {
+                              context.read<ProductProvider>().loadMore(token);
+                            }
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: CircularProgressIndicator()),
                 );
               }
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            final product = provider.products[index];
-            final bandColor = AppTheme
-                .bandColors[(index ~/ 10) % AppTheme.bandColors.length];
-            return Card(
-              color: bandColor,
-              child: ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    product.thumbnailUrl,
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) =>
-                        const Icon(Icons.image_not_supported),
+          
+              final product = provider.products[index];
+              final bandColor = AppTheme
+                  .bandColors[(index ~/ 10) % AppTheme.bandColors.length];
+              return Card(
+                color: bandColor,
+                child: ListTile(
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      product.thumbnailUrl,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) =>
+                          const Icon(Icons.image_not_supported),
+                    ),
                   ),
-                ),
-                title: Text(
-                  product.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.add_shopping_cart),
-                  onPressed: () {
-                    context.read<CartProvider>().addItem(product);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${product.title} added to cart'),
+                  title: Text(
+                    product.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.add_shopping_cart),
+                    onPressed: () {
+                      context.read<CartProvider>().addItem(product);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${product.title} added to cart'),
+                        ),
+                      );
+                    },
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: product,color: bandColor),
                       ),
                     );
                   },
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ProductDetailScreen(product: product,color: bandColor),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
     }
   }
