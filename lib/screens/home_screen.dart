@@ -14,12 +14,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadProducts());
+  }
+
+  void _onSearch(String text) {
+    final token = context.read<AuthProvider>().accessToken;
+    if (token == null) return;
+    context.read<ProductProvider>().search(text, token);
   }
 
   void _onScroll() {
@@ -175,13 +182,30 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _buildBody(provider),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Search products',
+                prefixIcon: Icon(Icons.search),
+              ),
+              textInputAction: TextInputAction.search,
+              onSubmitted: _onSearch,
+            ),
+          ),
+          Expanded(child: _buildBody(provider)),
+        ],
+      ),
     );
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 }

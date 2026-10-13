@@ -18,6 +18,7 @@
     bool _hasMore = true;
     int _skip = 0;
     bool _loadMoreFailed = false;
+    String _query = '';
 
 
     ProductListStatus get status => _status;
@@ -26,6 +27,7 @@
     bool get isLoadingMore => _isLoadingMore;
     bool get hasMore => _hasMore;
     bool get loadMoreFailed => _loadMoreFailed;
+    String get query => _query;
 
     ProductProvider(this._productService, this._refreshSession);
 
@@ -82,6 +84,7 @@
           accessToken: accessToken,
           limit: _pageSize,
           skip: skip,
+          query: _query,
         );
       } on ApiException catch (e) {
         if (e.statusCode != 401) rethrow;
@@ -94,6 +97,7 @@
             accessToken: newToken,
             limit: _pageSize,
             skip: skip,
+            query: _query,
           );
         }
       }
@@ -106,6 +110,12 @@
       _loadMoreFailed = false;
       _errorMessage = null;
       _status = ProductListStatus.loading;
+      _query = '';
       notifyListeners();
+    }
+    
+    Future<void> search(String query, String accessToken){
+      _query =query.trim();
+      return loadFirstPage(accessToken);
     }
   }

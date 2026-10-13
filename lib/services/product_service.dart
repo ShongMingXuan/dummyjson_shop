@@ -8,11 +8,20 @@ class ProductService {
     required String accessToken,
     int limit = 10,
     int skip = 0,
+    String query = '',
   }) async {
+    final path = query.isEmpty ? 'products' : 'products/search';
+    final uri = Uri.https('dummyjson.com', '/auth/$path', {
+      'limit': '$limit',
+      'skip': '$skip',
+      if (query.isNotEmpty) 'q': query,
+    });
+
     final response = await http.get(
-      Uri.parse('https://dummyjson.com/auth/products?limit=$limit&skip=$skip'),
+      uri,
       headers: {'Authorization': 'Bearer $accessToken'},
     ).timeout(const Duration(seconds: 10));
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final productsJson = data['products'] as List<dynamic>;
